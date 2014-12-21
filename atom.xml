@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[My Octopress Blog]]></title>
+  <link href="http://dotuancd.github.io/atom.xml" rel="self"/>
+  <link href="http://dotuancd.github.io/"/>
+  <updated>2014-12-21T11:29:25+07:00</updated>
+  <id>http://dotuancd.github.io/</id>
+  <author>
+    <name><![CDATA[Tuấn Đỗ]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[How_to_setup_zf2]]></title>
+    <link href="http://dotuancd.github.io/blog/2014/12/21/how-to-setup-zf2/"/>
+    <updated>2014-12-21T11:08:17+07:00</updated>
+    <id>http://dotuancd.github.io/blog/2014/12/21/how-to-setup-zf2</id>
+    <content type="html"><![CDATA[<h1>Cách cài đặt Zend Framework 2</h1>
+
+<h2>Cài đặt Zend Framework 2 Sekeleton Application</h2>
+
+<p>Đầu tiên bạn nên tải source của Zend Framework 2 Sekeleton Application. Đây là một ứng dụng mẫu được setup theo cấu trúc của Zend Framework 2 (Điều này là không cần thiết nến bạn đã nắm rõ cấu trúc thư mục của ZF2, Tất nhiên nếu sử dụng ZF2 Application Sekeleton thì sẽ nhanh hơn).</p>
+
+<ol>
+<li>Tải ZendSekeletonApplication bằng git.
+ Nếu máy bạn đã có <code>git</code> thì bạn có thể dùng lệnh:
+<code>git clone https://github.com/zendframework/ZendSkeletonApplication.git [thu_muc_cai_dat]</code>
+Lệnh này sẽ thực hiện sao chép một repository (trong repo đó sẽ chứa toàn bộ source code) từ github về máy của bạn.
+Nếu bạn không nhập <code>thu_muc_cai_dat</code> thì git sẽ tự động tạo một thư mục mới với tên là tên của repository trong trường hợp này sẽ là: <code>ZendSkeletonApplication</code> vào thư mục mà dấu nhắc lệnh đang đứng.</li>
+</ol>
+
+
+<p>Có rất nhiều cách để bạn có thể cài đặt được Zend Framework 2. Mình sẽ hướng dẫn một số cách thường được sử dụng.</p>
+]]></content>
+  </entry>
+  
+</feed>
