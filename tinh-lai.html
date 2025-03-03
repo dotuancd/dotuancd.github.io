@@ -1,0 +1,199 @@
+
+<html>
+    <head>
+        <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    </head>
+    <body class="container mx-auto p-4">
+        <div>
+            <h1 class="text-2xl">Interest Calculator</h1>
+            <form class="mt-4 flex flex-col gap-2">
+                <div>
+                    <label for="principal">Số tiền vay:</label>
+                    <input class="border rounded-lg px-2 font-mono" type="text" id="principal" name="principal" value="">
+                </div>
+                <div>
+                    <label for="months">Thời gian vay (tháng):</label>
+                    <input class="border rounded-lg px-2" type="number" id="months" name="months" value="420">
+                </div>
+
+                <div>
+                    <label for="interestRate">Lãi suất (%):</label>
+                    <input class="border rounded-lg px-2" type="number" id="interestRate" name="interestRate" value="9">
+                </div>
+
+                <div>
+                    <label for="preferentialInterestRate">Lãi suất tặng (%):</label>
+                    <input class="border rounded-lg px-2" type="number" id="preferentialInterestRate" name="preferentialInterestRate" value="7">
+                </div>
+
+                <div>
+                    <label for="preferentialMonths">Thời gian tặng (tháng):</label>
+                    <input class="border rounded-lg px-2" type="number" id="preferentialMonths" name="preferentialMonths" value="24">
+                </div>
+
+                <div>
+                    <label for="">Chu kỳ thanh toán thêm (tuỳ chọn):</label>
+                    <select class="border rounded-lg px-2" name="recurringExtraPayment" id="recurringExtraPayment">
+                        <option value="0">Không thanh toán thêm</option>
+                        <option value="12">Hàng năm</option>
+                        <option value="6">Hàng nửa năm</option>
+                        <option value="3">Hàng quý</option>
+                        <option value="1">Hàng tháng</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="extraPayment">Số tiền thanh toán thêm:</label>
+                    <input class="border rounded-lg px-2 font-mono" type="text" id="extraPayment" name="extraPayment" value="0"><br><br>
+                </div>
+
+                <div>
+                    <label for="extraPaymentInterestRate">Phí thanh toán trước (%)</label>
+                    <input class="border rounded-lg px-2 font-mono" type="number" id="extraPaymentInterestRate" name="extraPaymentInterestRate" value="0">
+                </div>
+
+                <div>
+                    <button type="button" class="border p-2 rounded-lg cursor-pointer" onclick="interest()">Calculate</button>
+                </div>
+            </form>
+        </div>
+        <div id="result" class="mt-4">
+            <h2 class="text-2xl">Bảng dự tính</h2>
+            <div>
+                Tổng lãi phải trả: <span id="totalInterest" class="font-bold font-mono"></span>
+            </div>
+            <div>
+                Tổng số tiền cần thanh toán: <span id="totalPayment" class="font-bold font-mono"></span>
+            </div>
+            <div>
+                Thời gian thanh toán: <span id="paymentTime" class="font-bold font-mono"></span>
+            </div>
+        </div>
+        <div id="schedules" class="font-mono"></div>
+    </body>
+</html>
+
+<script>
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(value);
+    };
+
+    formatCurrencyInput(document.getElementById('principal'));
+    formatCurrencyInput(document.getElementById('extraPayment'));
+
+    // Công cụ tính lãi vay dự trên dư nợ giảm dần,
+    // Có trả nợ gốc theo năm.
+    function paymentSchedules() {
+        const principal = document.getElementById('principal').value.replace(/\D/g, '');
+        const interestRate = document.getElementById('interestRate').value;
+
+        const months = document.getElementById('months').value;
+        const extractPayment = parseInt(document.getElementById('extraPayment').value.replace(/\D/g, ''));
+        const monthlyPayment = principal / months;
+
+        const preferredInterestRate = document.getElementById('preferentialInterestRate').value;
+        const preferredMonths = document.getElementById('preferentialMonths').value;
+
+        const extraPaymentInterestRate = document.getElementById('extraPaymentInterestRate').value;
+
+        let schedules = [];
+        let totalInterest = 0;
+        let totalPayment = 0;
+        let remainingPricipal = principal;
+        const recurringExtraPayment = parseInt(document.getElementById('recurringExtraPayment').value);
+
+        for (let i = 0; i < months; i++) {
+
+            let interest = 0;
+
+            if (i < preferredMonths) {
+                interest = remainingPricipal * preferredInterestRate / 100 / 12;
+            } else {
+                interest += remainingPricipal * interestRate / 100 / 12;
+            }
+
+            let principalPayment = monthlyPayment;
+            let extraPrincipal = 0;
+
+            if (i > 0 && i % recurringExtraPayment === 0) {
+                extraPrincipal = Math.min(remainingPricipal - monthlyPayment, extractPayment)
+            }
+            principalPayment += extraPrincipal;
+
+            let currentPayment = principalPayment + interest;
+            const extraPaymentFee = extraPrincipal * extraPaymentInterestRate / 100;
+
+            currentPayment = Math.min(currentPayment, remainingPricipal) + extraPaymentFee;
+
+            remainingPricipal = remainingPricipal - principalPayment;
+
+            totalInterest += interest;
+            totalPayment += currentPayment;
+
+            schedules.push({
+                month: i + 1,
+                interest,
+                payment: currentPayment,
+                extractPayment: extraPrincipal,
+                principalPayment,
+                remainingPricipal,
+                extraPaymentFee
+            });
+
+            if (remainingPricipal <= 0) {
+                break;
+            }
+        }
+
+        return {
+            schedules,
+            totalInterest,
+            totalPayment
+        };
+    }
+
+    function formatCurrencyInput(inputEl) {
+        inputEl.addEventListener('keyup', (e) => {
+            const value = e.target.value.replace(/\D/g, '');
+            e.target.value = new Intl.NumberFormat('vi-VN').format(value);
+        });
+    }
+
+    function interest() {
+        const result = paymentSchedules();
+        let html = '<table>';
+        html += '<tr>';
+        html += '<th class="p-1 border">Tháng</th>';
+        html += '<th class="p-1 border w-36">Lãi</th>';
+        html += '<th class="p-1 border w-36">Gốc</th>';
+        html += '<th class="p-1 border w-36">Phí trả trước</th>';
+        html += '<th class="p-1 border w-48">Tổng cần thanh toán</th>'
+        html += '<th class="p-1 border w-36">Dư nợ</th>';
+        html += '</tr>';
+
+        result.schedules.forEach(schedule => {
+            html += '<tr>';
+            html += '<td class="p-1 border">' + schedule.month + '</td>';
+            html += '<td class="p-1 border text-right">' + formatCurrency(schedule.interest) + '</td>';
+            // html += '<td>' + formatCurrency(schedule.endow) + '</td>';
+            html += '<td class="p-1 border text-right">' + formatCurrency(schedule.principalPayment) + '</td>';
+            html += '<td class="p-1 border text-right">' + formatCurrency(schedule.extraPaymentFee) + '</td>';
+            html += '<td class="p-1 border text-right">' + formatCurrency(schedule.payment) + '</td>';
+            html += '<td class="p-1 border text-right">' + formatCurrency(schedule.remainingPricipal) + '</td>';
+            html += '</tr>';
+        });
+
+        html += '</table>';
+        document.getElementById('schedules').innerHTML = html;
+        document.getElementById('totalInterest').innerHTML = formatCurrency(result.totalInterest);
+        document.getElementById('totalPayment').innerHTML = formatCurrency(result.totalPayment);
+
+        const years = Math.floor(result.schedules.length / 12);
+        const months = result.schedules.length % 12;
+        document.getElementById('paymentTime').innerHTML = years + ' năm ' + months + ' tháng';
+    }
+</script>
